@@ -1,0 +1,16 @@
+name = "CodeEvaluation"
+uuid = "5a076611-96cb-4f02-9d3a-9e309f06f8ff"
+authors = ["Morten Piibeleht <morten.piibeleht@juliahub.com> and contributors"]
+version = "0.0.1"
+
+[deps]
+IOCapture = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+
+[compat]
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
