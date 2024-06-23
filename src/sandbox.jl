@@ -19,8 +19,8 @@ and the code is evaluated within the context of that module.
 
 # Properties
 
-- `m::Module`: The actual Julia module in which the code will be evaluated.
-- `pwd::String`: The working directory where the code gets evaluated (irrespective of
+- `m :: Module`: The actual Julia module in which the code will be evaluated.
+- `pwd :: String`: The working directory where the code gets evaluated (irrespective of
   the current working directory of the process).
 
 See also: [`evaluate!`](@ref).
@@ -51,8 +51,7 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true)
     result, buffer = nothing, IOBuffer()
 
     # TODO: use keywords, linenumbernode?
-    @show parseblock(code)
-    for (ex, str) in parseblock(code)
+    for (ex, str) in _parseblock(code)
         c = IOCapture.capture(rethrow=InterruptException, color=ansicolor) do
             cd(sandbox.pwd) do
                 Core.eval(sandbox.m, ex)
@@ -89,13 +88,13 @@ parsed from.
 The keyword argument `skip = N` drops the leading `N` lines from the input string.
 
 If `raise=false` is passed, the `Meta.parse` does not raise an exception on parse errors,
-but instead returns an expression that will raise an error when evaluated. `parseblock`
+but instead returns an expression that will raise an error when evaluated. `_parseblock`
 returns this expression normally and it must be handled appropriately by the caller.
 
 The `linenumbernode` can be passed as a `LineNumberNode` to give information about filename
 and starting line number of the block (requires Julia 1.6 or higher).
 """
-function parseblock(
+function _parseblock(
     code::AbstractString;
     skip=0,
     keywords=true,
@@ -141,9 +140,9 @@ function parseblock(
                 newfile = "REPL[$i]"
                 # to reset the line counter for each new "file"
                 lineshift = 1 - ex[1].line
-                update_linenumbernodes!(expr, newfile, lineshift)
+                _update_linenumbernodes!(expr, newfile, lineshift)
             else
-                update_linenumbernodes!(expr, linenumbernode.file, linenumbernode.line)
+                _update_linenumbernodes!(expr, linenumbernode.file, linenumbernode.line)
             end
             results[i] = (expr, results[i][2])
         end
@@ -151,13 +150,13 @@ function parseblock(
     results
 end
 
-function update_linenumbernodes!(x::Expr, newfile, lineshift)
+function _update_linenumbernodes!(x::Expr, newfile, lineshift)
     for i = 1:length(x.args)
-        x.args[i] = update_linenumbernodes!(x.args[i], newfile, lineshift)
+        x.args[i] = _update_linenumbernodes!(x.args[i], newfile, lineshift)
     end
     return x
 end
-update_linenumbernodes!(x::Any, newfile, lineshift) = x
-function update_linenumbernodes!(x::LineNumberNode, newfile, lineshift)
+_update_linenumbernodes!(x::Any, newfile, lineshift) = x
+function _update_linenumbernodes!(x::LineNumberNode, newfile, lineshift)
     return LineNumberNode(x.line + lineshift, newfile)
 end

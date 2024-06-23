@@ -2,13 +2,13 @@ using CodeEvaluation
 using Test
 
 @testset "CodeEvaluation.jl" begin
-    @testset "parseblock" begin
+    @testset "_parseblock" begin
         code = """
         x += 3
         γγγ_γγγ
         γγγ
         """
-        exprs = CodeEvaluation.parseblock(code)
+        exprs = CodeEvaluation._parseblock(code)
 
         @test isa(exprs, Vector)
         @test length(exprs) === 3
@@ -31,7 +31,7 @@ using Test
     # https://github.com/JuliaDocs/Documenter.jl/issues/749
     # https://github.com/JuliaDocs/Documenter.jl/issues/790
     # https://github.com/JuliaDocs/Documenter.jl/issues/823
-    let parse(x) = CodeEvaluation.parseblock(x)
+    let parse(x) = CodeEvaluation._parseblock(x)
         for LE in ("\r\n", "\n")
             l1, l2 = parse("x = Int[]$(LE)$(LE)push!(x, 1)$(LE)")
             @test l1[1] == :(x = Int[])
