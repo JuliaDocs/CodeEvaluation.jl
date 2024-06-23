@@ -18,5 +18,5 @@ function Base.get!(s::NamedSandboxes, name::Union{AbstractString,Nothing}=nothin
     end
     # Either fetch and return an existing sandbox from the meta dictionary (based on the generated name),
     # or initialize a new clean one, which gets stored in meta for future re-use.
-    return get!(() -> Sandbox(sym, s._pwd), s._sandboxes, sym)
+    return get!(() -> Sandbox(sym; workingdirectory=s._pwd), s._sandboxes, sym)
 end

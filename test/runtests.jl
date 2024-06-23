@@ -57,21 +57,21 @@ using Test
     end
 
     @testset "evaluate!" begin
-        let sb = CodeEvaluation.Sandbox(:foo, @__DIR__)
+        let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
             write(sb, "2 + 2")
             (result, output) = CodeEvaluation.evaluate!(sb)
             @test result === 4
             @test output === ""
         end
 
-        let sb = CodeEvaluation.Sandbox(:foo, @__DIR__)
+        let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
             write(sb, "print(\"123\")")
             (result, output) = CodeEvaluation.evaluate!(sb)
             @test result === nothing
             @test output === "123"
         end
 
-        let sb = CodeEvaluation.Sandbox(:foo, @__DIR__)
+        let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
             write(
                 sb,
                 """

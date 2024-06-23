@@ -1,7 +1,7 @@
 # Constructs a new sandbox module, that emulates an empty Julia Main module.
 function _sandbox_module(name::Symbol)
     # If the module does not exists already, we need to construct a new one.
-    m = Module(sym)
+    m = Module(name)
     # eval(expr) is available in the REPL (i.e. Main) so we emulate that for the sandbox
     Core.eval(m, :(eval(x) = Core.eval($m, x)))
     # modules created with Module() does not have include defined
@@ -31,17 +31,13 @@ mutable struct Sandbox
     _codebuffer::IOBuffer
 
     function Sandbox(
-        name::Union{Symbol, Nothing} = nothing;
-        workingdirectory::AbstractString = pwd()
+        name::Union{Symbol,Nothing}=nothing;
+        workingdirectory::AbstractString=pwd()
     )
         if isnothing(name)
             name = Symbol("__CodeEvaluation__", _gensym_string())
         end
-        return new(
-            _sandbox_module(name),
-            workingdirectory,
-            IOBuffer(),
-        )
+        return new(_sandbox_module(name), workingdirectory, IOBuffer(),)
     end
 end
 
@@ -69,10 +65,10 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true)
             #bt = Documenter.remove_common_backtrace(c.backtrace)
             bt = c.backtrace
             @error """
-                Error executing code:
-                ```
-                $(code)
-                ```
+            Error executing code:
+            ```
+            $(code)
+            ```
             """ exception = (c.value, bt)
             return
         end
