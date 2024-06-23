@@ -72,11 +72,14 @@ using Test
         end
 
         let sb = CodeEvaluation.Sandbox(:foo, @__DIR__)
-            write(sb, """
-            x = 2 + 2
-            print(x)
-            x + 1
-            """)
+            write(
+                sb,
+                """
+      x = 2 + 2
+      print(x)
+      x + 1
+      """
+            )
             (result, output) = CodeEvaluation.evaluate!(sb)
             @test result === 5
             @test output === "4"

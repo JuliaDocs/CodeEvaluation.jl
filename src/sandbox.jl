@@ -31,7 +31,7 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true)
     # TODO: use keywords, linenumbernode?
     @show parseblock(code)
     for (ex, str) in parseblock(code)
-        c = IOCapture.capture(rethrow = InterruptException, color = ansicolor) do
+        c = IOCapture.capture(rethrow=InterruptException, color=ansicolor) do
             cd(sandbox.pwd) do
                 Core.eval(sandbox.m, ex)
             end
@@ -52,7 +52,7 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true)
         end
     end
 
-    return (; result, output = String(take!(buffer)))
+    return (; result, output=String(take!(buffer)))
 end
 
 Base.write(sandbox::Sandbox, data) = write(sandbox._codebuffer, data)
@@ -73,10 +73,16 @@ returns this expression normally and it must be handled appropriately by the cal
 The `linenumbernode` can be passed as a `LineNumberNode` to give information about filename
 and starting line number of the block (requires Julia 1.6 or higher).
 """
-function parseblock(code::AbstractString; skip = 0, keywords = true, raise=true, linenumbernode=nothing)
+function parseblock(
+    code::AbstractString;
+    skip=0,
+    keywords=true,
+    raise=true,
+    linenumbernode=nothing
+)
     # Drop `skip` leading lines from the code block. Needed for deprecated `{docs}` syntax.
     code = string(code, '\n')
-    code = last(split(code, '\n', limit = skip + 1))
+    code = last(split(code, '\n', limit=skip + 1))
     endofstr = lastindex(code)
     results = []
     cursor = 1
@@ -117,14 +123,14 @@ function parseblock(code::AbstractString; skip = 0, keywords = true, raise=true,
             else
                 update_linenumbernodes!(expr, linenumbernode.file, linenumbernode.line)
             end
-            results[i] = (expr , results[i][2])
+            results[i] = (expr, results[i][2])
         end
     end
     results
 end
 
 function update_linenumbernodes!(x::Expr, newfile, lineshift)
-    for i in 1:length(x.args)
+    for i = 1:length(x.args)
         x.args[i] = update_linenumbernodes!(x.args[i], newfile, lineshift)
     end
     return x
