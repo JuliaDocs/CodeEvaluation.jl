@@ -1,5 +1,6 @@
 module CodeEvaluation
-import IOCapture
+using IOCapture: IOCapture
+using REPL: REPL
 
 include("sandbox.jl")
 include("namedsandboxes.jl")

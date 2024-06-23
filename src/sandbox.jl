@@ -44,7 +44,7 @@ end
 # TODO: by stripping the #-s, we're probably losing the uniqueness guarantee?
 _gensym_string() = lstrip(string(gensym()), '#')
 
-function evaluate!(sandbox::Sandbox; ansicolor::Bool=true)
+function evaluate!(sandbox::Sandbox; ansicolor::Bool=true, repl::Bool=false)
     code = String(take!(sandbox._codebuffer))
 
     # Evaluate the code block. We redirect stdout/stderr to `buffer`.
@@ -52,6 +52,9 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true)
 
     # TODO: use keywords, linenumbernode?
     for (ex, str) in _parseblock(code)
+        # if repl
+        #     ex = REPL.softscope(ex)
+        # end
         c = IOCapture.capture(rethrow=InterruptException, color=ansicolor) do
             cd(sandbox.pwd) do
                 Core.eval(sandbox.m, ex)
@@ -75,6 +78,8 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true)
 
     return (; result, output=String(take!(buffer)))
 end
+
+Base.nameof(sandbox::Sandbox) = nameof(sandbox.m)
 
 Base.write(sandbox::Sandbox, data) = write(sandbox._codebuffer, data)
 
@@ -159,4 +164,8 @@ end
 _update_linenumbernodes!(x::Any, newfile, lineshift) = x
 function _update_linenumbernodes!(x::LineNumberNode, newfile, lineshift)
     return LineNumberNode(x.line + lineshift, newfile)
+end
+
+function Base.Core.eval(sandbox::Sandbox, expr)
+    return Core.eval(sandbox.m, expr)
 end
