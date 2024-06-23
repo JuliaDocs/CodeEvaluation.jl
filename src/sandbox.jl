@@ -1,5 +1,5 @@
-# Constructs a new sandbox module, that emulates an emptry Julia Main module.
-function _sandbox_module(sym::Symbol)
+# Constructs a new sandbox module, that emulates an empty Julia Main module.
+function _sandbox_module(name::Symbol)
     # If the module does not exists already, we need to construct a new one.
     m = Module(sym)
     # eval(expr) is available in the REPL (i.e. Main) so we emulate that for the sandbox
@@ -9,14 +9,40 @@ function _sandbox_module(sym::Symbol)
     return m
 end
 
-# TODO: add a method to write to _codebuffer without evaluating the code
-# This is to enable the "ContinuedCode" use case, where you want to "prepare"
-# the input code over multiple writes.
+"""
+    mutable struct Sandbox
+
+Represents a fake Julia `Main` module, where code can be evaluated in isolation.
+
+Technically, it wraps a fresh Julia `Module` object (accessible via the `.m` properties),
+and the code is evaluated within the context of that module.
+
+# Properties
+
+- `m::Module`: The actual Julia module in which the code will be evaluated.
+- `pwd::String`: The working directory where the code gets evaluated (irrespective of
+  the current working directory of the process).
+
+See also: [`evaluate!`](@ref).
+"""
 mutable struct Sandbox
     m::Module
     pwd::String
     _codebuffer::IOBuffer
-    Sandbox(sym::Symbol, pwd::AbstractString) = new(_sandbox_module(sym), pwd, IOBuffer())
+
+    function Sandbox(
+        name::Union{Symbol, Nothing} = nothing;
+        workingdirectory::AbstractString = pwd()
+    )
+        if isnothing(name)
+            name = Symbol("__CodeEvaluation__", _gensym_string())
+        end
+        return new(
+            _sandbox_module(name),
+            workingdirectory,
+            IOBuffer(),
+        )
+    end
 end
 
 # TODO: by stripping the #-s, we're probably losing the uniqueness guarantee?
