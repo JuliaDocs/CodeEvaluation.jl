@@ -3,14 +3,14 @@ struct NamedSandboxes
     _prefix::String
     _sandboxes::Dict{Symbol,Sandbox}
 
-    function NamedSandboxes(pwd::AbstractString, prefix::AbstractString = "")
+    function NamedSandboxes(pwd::AbstractString, prefix::AbstractString="")
         unique_prefix = _gensym_string()
         prefix = isempty(prefix) ? unique_prefix : string(prefix, "_", unique_prefix)
         return new(pwd, prefix, Dict{Symbol,Sandbox}())
     end
 end
 
-function Base.get!(s::NamedSandboxes, name::Union{AbstractString,Nothing} = nothing)
+function Base.get!(s::NamedSandboxes, name::Union{AbstractString,Nothing}=nothing)
     sym = if isnothing(name) || isempty(name)
         Symbol("__", s._prefix, "__", _gensym_string())
     else
