@@ -75,10 +75,10 @@ using Test
             write(
                 sb,
                 """
-      x = 2 + 2
-      print(x)
-      x + 1
-      """
+                x = 2 + 2
+                print(x)
+                x + 1
+                """
             )
             (result, output) = CodeEvaluation.evaluate!(sb)
             @test result === 5
