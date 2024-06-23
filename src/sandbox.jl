@@ -44,6 +44,33 @@ end
 # TODO: by stripping the #-s, we're probably losing the uniqueness guarantee?
 _gensym_string() = lstrip(string(gensym()), '#')
 
+"""
+    Base.write(sandbox::Sandbox, code::AbstractString) -> Int
+
+Writes the code `code` to the `Sandbox` object, which can then be evaluated by
+[`evaluate!`](@ref). This can be called multiple times to append code to a buffer,
+and then the whole buffer can be evaluated at once.
+"""
+Base.write(sandbox::Sandbox, code) = write(sandbox._codebuffer, code)
+
+"""
+    function evaluate!(sandbox::Sandbox, [code::AbstractString]; kwargs...)
+
+Evaluates the code in the buffer of the `Sandbox` object.
+
+# Keyword arguments
+
+- `ansicolor :: Bool=true`: whether or not to capture colored output (i.e. controls the IOContext
+  of the output stream; see the `IOCapture.capture` function for more details).
+- `repl :: Bool=false`: ...
+"""
+function evaluate! end
+
+function evaluate!(sandbox::Sandbox, code::AbstractString; kwargs...)
+    write(sandbox, code)
+    return evaluate!(sandbox; kwargs...)
+end
+
 function evaluate!(sandbox::Sandbox; ansicolor::Bool=true, repl::Bool=false)
     code = String(take!(sandbox._codebuffer))
 
@@ -79,9 +106,12 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true, repl::Bool=false)
     return (; result, output=String(take!(buffer)))
 end
 
-Base.nameof(sandbox::Sandbox) = nameof(sandbox.m)
+"""
+    Base.nameof(sandbox::Sandbox) -> Symbol
 
-Base.write(sandbox::Sandbox, data) = write(sandbox._codebuffer, data)
+Returns the name of the underlying module of the `Sandbox` object.
+"""
+Base.nameof(sandbox::Sandbox) = nameof(sandbox.m)
 
 """
 Returns a vector of parsed expressions and their corresponding raw strings.
