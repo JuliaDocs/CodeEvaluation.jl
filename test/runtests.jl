@@ -86,7 +86,7 @@ using Test
                 """
             )
             write(sb, "x + 1")
-            (result, output) = CodeEvaluation.evaluate!(sb)
+            r = CodeEvaluation.evaluate!(sb)
             @test r isa CodeEvaluation.Result
             @test r.sandbox === sb
             @test r.value isa CodeEvaluation.AnsValue
