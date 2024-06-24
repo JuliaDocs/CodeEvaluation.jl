@@ -59,16 +59,22 @@ using Test
     @testset "evaluate!" begin
         let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
             write(sb, "2 + 2")
-            (result, output) = CodeEvaluation.evaluate!(sb)
-            @test result === 4
-            @test output === ""
+            r = CodeEvaluation.evaluate!(sb)
+            @test r isa CodeEvaluation.Result
+            @test r.sandbox === sb
+            @test r.value isa CodeEvaluation.AnsValue
+            @test r.value[] === 4
+            @test r.output === ""
         end
 
         let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
             write(sb, "print(\"123\")")
-            (result, output) = CodeEvaluation.evaluate!(sb)
-            @test result === nothing
-            @test output === "123"
+            r = CodeEvaluation.evaluate!(sb)
+            @test r isa CodeEvaluation.Result
+            @test r.sandbox === sb
+            @test r.value isa CodeEvaluation.AnsValue
+            @test r.value[] === nothing
+            @test r.output === "123"
         end
 
         let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
@@ -77,12 +83,15 @@ using Test
                 """
                 x = 2 + 2
                 print(x)
-                x + 1
                 """
             )
+            write(sb, "x + 1")
             (result, output) = CodeEvaluation.evaluate!(sb)
-            @test result === 5
-            @test output === "4"
+            @test r isa CodeEvaluation.Result
+            @test r.sandbox === sb
+            @test r.value isa CodeEvaluation.AnsValue
+            @test r.value[] === 5
+            @test r.output === "4"
         end
     end
 end

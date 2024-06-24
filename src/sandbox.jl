@@ -54,7 +54,54 @@ and then the whole buffer can be evaluated at once.
 Base.write(sandbox::Sandbox, code) = write(sandbox._codebuffer, code)
 
 """
-    function evaluate!(sandbox::Sandbox, [code::AbstractString]; kwargs...)
+    abstract type AbstractValue end
+
+Will be one of: [`AnsValue`](@ref), [`ExceptionValue`](@ref), or [`ParseErrorValue`](@ref).
+"""
+abstract type AbstractValue end
+
+struct AnsValue <: AbstractValue
+    object::Any
+end
+Base.getindex(v::AnsValue) = v.object
+
+struct ExceptionValue <: AbstractValue
+    exception::Any
+    backtrace::Any
+    full_backtrace::Any
+end
+Base.getindex(v::ExceptionValue) = v.exception
+
+struct ParseErrorValue <: AbstractValue
+    error::Any # TODO: use the correct error object?
+end
+Base.getindex(v::ParseErrorValue) = v.error
+
+"""
+    struct Result
+
+Contains the result of an evaluation (see [`evaluate!`](@ref)).
+
+# Properties
+
+- `sandbox :: Sandbox`: The `Sandbox` object in which the code was evaluated.
+- `value :: AbstractValue`: The result of the evaluation. Depending on the outcome
+  of the evaluation (success vs error etc), this will be of a different subtype of
+  [`AbstractValue`](@ref).
+- `output :: String`: The captured stdout and stderr output of the evaluation.
+- `show :: String`: The `show` representation of the resulting object.
+"""
+struct Result
+    sandbox::Sandbox
+    value::AbstractValue
+    output::String
+    show::String
+    _source::Union{String, Nothing}
+    _expressions::Vector{Tuple{Any, String}}
+end
+
+"""
+    evaluate!(sandbox::Sandbox, [code::AbstractString]; kwargs...)
 
 Evaluates the code in the buffer of the `Sandbox` object.
 
@@ -62,7 +109,15 @@ Evaluates the code in the buffer of the `Sandbox` object.
 
 - `ansicolor :: Bool=true`: whether or not to capture colored output (i.e. controls the IOContext
   of the output stream; see the `IOCapture.capture` function for more details).
-- `repl :: Bool=false`: ...
+- `repl :: Bool=false`: evaluates the code in "REPL mode".
+
+# REPL mode
+
+When evaluating the code in "REPL mode" (`repl = true`), there are the following differences:
+
+- The code is evaluated in a "soft scope" (i.e. `REPL.softscope` is applied to the code).
+- It honors the semicolon suppression (i.e. the result of the last expression is set to `nothing`
+  if the line ends with a semicolon).
 """
 function evaluate! end
 
@@ -78,7 +133,8 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true, repl::Bool=false)
     result, buffer = nothing, IOBuffer()
 
     # TODO: use keywords, linenumbernode?
-    for (ex, str) in _parseblock(code)
+    expressions = _parseblock(code)
+    for (ex, str) in expressions
         # if repl
         #     ex = REPL.softscope(ex)
         # end
@@ -87,23 +143,30 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true, repl::Bool=false)
                 Core.eval(sandbox.m, ex)
             end
         end
-        Core.eval(sandbox.m, Expr(:global, Expr(:(=), :ans, QuoteNode(c.value))))
-        result = c.value
         print(buffer, c.output)
         if c.error
-            #bt = Documenter.remove_common_backtrace(c.backtrace)
-            bt = c.backtrace
-            @error """
-            Error executing code:
-            ```
-            $(code)
-            ```
-            """ exception = (c.value, bt)
-            return
+            return Result(
+                sandbox,
+                ExceptionValue(c.value, c.backtrace, c.backtrace #= TODO =#),
+                String(take!(buffer)),
+                sprint(showerror, c.value), # TODO
+                code,
+                expressions,
+            )
+        else
+            Core.eval(sandbox.m, Expr(:global, Expr(:(=), :ans, QuoteNode(c.value))))
+            result = c.value
         end
     end
 
-    return (; result, output=String(take!(buffer)))
+    return Result(
+        sandbox,
+        AnsValue(result),
+        String(take!(buffer)),
+        sprint(show, result), # TODO
+        code,
+        expressions,
+    )
 end
 
 """
