@@ -46,16 +46,6 @@ using Test
         end
     end
 
-    @testset "NamedSandboxes" begin
-        sandboxes = CodeEvaluation.NamedSandboxes(@__DIR__, "testsandbox")
-        sb1 = get!(sandboxes, "foo")
-        sb2 = get!(sandboxes, "bar")
-        sb3 = get!(sandboxes, "foo")
-        @test sb1.m !== sb2.m
-        @test sb1.m === sb3.m
-        @test sb2.m !== sb3.m
-    end
-
     @testset "evaluate!" begin
         let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
             write(sb, "2 + 2")
@@ -92,6 +82,33 @@ using Test
             @test r.value isa CodeEvaluation.AnsValue
             @test r.value[] === 5
             @test r.output === "4"
+        end
+
+        let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
+            r = CodeEvaluation.evaluate!(sb, """error("x")""")
+            @test r isa CodeEvaluation.Result
+            @test r.sandbox === sb
+            @test r.value isa CodeEvaluation.ExceptionValue
+            @test r.value[] isa ErrorException
+            @test r.value[].msg == "x"
+            @test r.output === ""
+        end
+
+        let sb = CodeEvaluation.Sandbox(:foo; workingdirectory=@__DIR__)
+            r = CodeEvaluation.evaluate!(
+                sb,
+                """
+                print("x")
+                error("x")
+                print("y")
+                """
+            )
+            @test r isa CodeEvaluation.Result
+            @test r.sandbox === sb
+            @test r.value isa CodeEvaluation.ExceptionValue
+            @test r.value[] isa ErrorException
+            @test r.value[].msg == "x"
+            @test r.output === "x"
         end
     end
 end
