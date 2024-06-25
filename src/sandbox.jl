@@ -89,11 +89,26 @@ Contains the result of an evaluation (see [`evaluate!`](@ref)).
 """
 struct Result
     sandbox::Sandbox
-    value::AbstractValue
+    _value::AbstractValue
     output::String
     show::String
     _source::Union{String, Nothing}
     _expressions::Vector{Tuple{Any, String}}
+end
+
+function Base.getproperty(r::Result, name::Symbol)
+    if name === :error
+        return getfield(r, :_value) isa ExceptionValue
+    elseif name === :value
+        # TODO: change to _value[] ?
+        return getfield(r, :_value)
+    else
+        return getfield(r, name)
+    end
+end
+
+function Base.propertynames(::Type{Result})
+    return (:sandbox, :value, :output, :show, :error)
 end
 
 """
@@ -131,9 +146,9 @@ function evaluate!(sandbox::Sandbox; color::Bool=true, repl::Bool=false)
     # TODO: use keywords, linenumbernode?
     expressions = _parseblock(code)
     for (ex, str) in expressions
-        # if repl
-        #     ex = REPL.softscope(ex)
-        # end
+        if repl
+            ex = REPL.softscope(ex)
+        end
         c = IOCapture.capture(; rethrow=InterruptException, color) do
             cd(sandbox.pwd) do
                 Core.eval(sandbox.m, ex)
