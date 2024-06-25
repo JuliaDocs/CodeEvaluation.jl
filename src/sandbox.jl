@@ -56,7 +56,8 @@ Base.write(sandbox::Sandbox, code) = write(sandbox._codebuffer, code)
 """
     abstract type AbstractValue end
 
-Will be one of: [`AnsValue`](@ref), [`ExceptionValue`](@ref), or [`ParseErrorValue`](@ref).
+Will either [`AnsValue`](@ref) if the code evaluated successfully, or [`ExceptionValue`](@ref)
+if it did not.
 """
 abstract type AbstractValue end
 
@@ -71,11 +72,6 @@ struct ExceptionValue <: AbstractValue
     full_backtrace::Any
 end
 Base.getindex(v::ExceptionValue) = v.exception
-
-struct ParseErrorValue <: AbstractValue
-    error::Any # TODO: use the correct error object?
-end
-Base.getindex(v::ParseErrorValue) = v.error
 
 """
     struct Result
@@ -126,7 +122,7 @@ function evaluate!(sandbox::Sandbox, code::AbstractString; kwargs...)
     return evaluate!(sandbox; kwargs...)
 end
 
-function evaluate!(sandbox::Sandbox; ansicolor::Bool=true, repl::Bool=false)
+function evaluate!(sandbox::Sandbox; color::Bool=true, repl::Bool=false)
     code = String(take!(sandbox._codebuffer))
 
     # Evaluate the code block. We redirect stdout/stderr to `buffer`.
@@ -138,7 +134,7 @@ function evaluate!(sandbox::Sandbox; ansicolor::Bool=true, repl::Bool=false)
         # if repl
         #     ex = REPL.softscope(ex)
         # end
-        c = IOCapture.capture(rethrow=InterruptException, color=ansicolor) do
+        c = IOCapture.capture(; rethrow=InterruptException, color) do
             cd(sandbox.pwd) do
                 Core.eval(sandbox.m, ex)
             end
