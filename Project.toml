@@ -7,6 +7,7 @@ version = "0.0.1"
 IOCapture = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
 
 [compat]
+IOCapture = "0.2"
 julia = "1.6"
 
 [extras]
