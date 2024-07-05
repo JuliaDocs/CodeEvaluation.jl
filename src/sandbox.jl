@@ -115,6 +115,13 @@ function Base.getproperty(r::Result, name::Symbol)
         return getfield(r, :_value) isa ExceptionValue
     elseif name === :value
         return getfield(r, :_value)[]
+    elseif name === :backtrace
+        value = getfield(r, :_value)
+        if value isa ExceptionValue
+            return value.backtrace
+        else
+            return nothing
+        end
     else
         return getfield(r, name)
     end
