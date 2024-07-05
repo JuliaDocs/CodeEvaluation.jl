@@ -176,3 +176,37 @@ function evaluate!(
         expr,
     )
 end
+
+#=
+"""
+"""
+function show_plain(result::Result; io_context::AbstractVector = [])
+    _check_io_context_value(io_context)
+    context = isempty(io_context) ? nothing : only(io_context)
+    mime = MIME"text/plain"()
+    s = stringmime(mime, result.value, context = context)
+    return replace(s, Regex(("(Main\\.)?$(nameof(mod))")) => "Main")
+end
+
+function _check_io_context_value(io_context::AbstractVector)
+    if any(x -> !isa(x, Pair{Symbol,<:Any}), io_context)
+        throw(ArgumentError("`io_context` must be a `Vector` of `Pair{Symbol,<:Any}`."))
+    end
+end
+=#
+
+function _remove_common_backtrace(bt, reference_bt = backtrace())
+    cutoff = nothing
+    # We'll start from the top of the backtrace (end of the array) and go down, checking
+    # if the backtraces agree
+    for ridx in 1:length(bt)
+        # Cancel search if we run out the reference BT or find a non-matching one frames:
+        if ridx > length(reference_bt) || bt[length(bt) - ridx + 1] != reference_bt[length(reference_bt) - ridx + 1]
+            cutoff = length(bt) - ridx + 1
+            break
+        end
+    end
+    # It's possible that the loop does not find anything, i.e. that all BT elements are in
+    # the reference_BT too. In that case we'll just return an empty BT.
+    bt[1:(cutoff === nothing ? 0 : cutoff)]
+end

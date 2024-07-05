@@ -69,7 +69,7 @@ function parseblock(
             else
                 _update_linenumbernodes!(expr, linenumbernode.file, linenumbernode.line)
             end
-            results[i] = ParsedExpression(expr, results[i][2])
+            results[i] = ParsedExpression(expr, results[i].code)
         end
     end
     results

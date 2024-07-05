@@ -11,4 +11,7 @@ using Test
     @testset "codeblock!" begin
         include("codeblock.jl")
     end
+    @testset "replblock!" begin
+        include("replblock.jl")
+    end
 end

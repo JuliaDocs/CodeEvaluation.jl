@@ -1,4 +1,27 @@
 @testset "basic" begin
+    let exprs = CodeEvaluation.parseblock("")
+        @test isa(exprs, Vector{CodeEvaluation.ParsedExpression})
+        @test isempty(exprs)
+    end
+    let exprs = CodeEvaluation.parseblock("0")
+        @test isa(exprs, Vector{CodeEvaluation.ParsedExpression})
+        @test length(exprs) == 1
+        let expr = exprs[1]
+            @test expr.expr == 0
+            @test expr.code == "0\n" # TODO: trailing newline?
+        end
+    end
+    let exprs = CodeEvaluation.parseblock("40  + 2")
+        @test isa(exprs, Vector{CodeEvaluation.ParsedExpression})
+        @test length(exprs) == 1
+        let expr = exprs[1]
+            @test expr.expr == :(40 + 2)
+            @test expr.code == "40  + 2\n" # TODO: trailing newline?
+        end
+    end
+end
+
+@testset "complex" begin
     exprs = CodeEvaluation.parseblock(
         """
         x += 3
@@ -7,7 +30,7 @@
         """
     )
     @test isa(exprs, Vector{CodeEvaluation.ParsedExpression})
-    @test length(exprs) === 3
+    @test length(exprs) == 3
 
     let expr = exprs[1]
         @test expr.expr isa Expr

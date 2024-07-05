@@ -167,3 +167,20 @@ end
         @test r.output == ""
     end
 end
+
+#=
+@testset "show_plain" begin
+    sb = CodeEvaluation.Sandbox()
+    let r = CodeEvaluation.evaluate!(sb, :(40 + 2))
+        @test CodeEvaluation.show_plain(r) == "42"
+    end
+    let r = CodeEvaluation.evaluate!(sb, quote
+            module X
+                function foo end
+            end
+            X.foo
+        end)
+        @test CodeEvaluation.show_plain(r) == "42"
+    end
+end
+=#
