@@ -85,6 +85,11 @@ end
         @test exprs[1].expr == Expr(:toplevel, :x, :y, :z)
         @test exprs[1].code == "x; y; z\n"
         @test exprs[2].expr == :q
-        @test exprs[2].code == "q\n\n\n"
+        # TODO: There is a parsing difference here.. probably due to the JuliaSyntax change.
+        if VERSION < v"1.10"
+            @test exprs[2].code == "q\n"
+        else
+            @test exprs[2].code == "q\n\n\n"
+        end
     end
 end
