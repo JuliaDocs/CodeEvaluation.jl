@@ -1,6 +1,6 @@
 name = "CodeEvaluation"
 uuid = "5a076611-96cb-4f02-9d3a-9e309f06f8ff"
-authors = ["Morten Piibeleht <morten.piibeleht@juliahub.com> and contributors"]
+authors = ["Morten Piibeleht <morten.piibeleht@gmail.com> and contributors"]
 version = "0.0.1"
 
 [deps]
