@@ -76,6 +76,9 @@ end
         let sb = CodeEvaluation.Sandbox(; workingdirectory=path)
             let r = CodeEvaluation.codeblock!(sb, "pwd()")
                 @test !r.error
+                # Apparently on MacOS, the tempdir is a symlink ??
+                @show r.value islink(r.value) isdir(r.value)
+                @show path islink(path) isdir(path)
                 @test r.value == path
                 @test r.output == ""
             end
