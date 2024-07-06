@@ -70,12 +70,8 @@ Returns the name of the underlying module of the `Sandbox` object.
 """
 Base.nameof(sandbox::Sandbox) = nameof(sandbox.m)
 
-"""
-    abstract type AbstractValue end
-
-Will either [`AnsValue`](@ref) if the code evaluated successfully, or [`ExceptionValue`](@ref)
-if it did not.
-"""
+# Will either be [`AnsValue`](@ref) if the code evaluated successfully,
+# or [`ExceptionValue`](@ref) if it did not.
 abstract type AbstractValue end
 
 struct AnsValue <: AbstractValue

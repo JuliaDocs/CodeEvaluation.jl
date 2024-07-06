@@ -1,3 +1,17 @@
+"""
+    struct CodeBlock
+
+Represents a single block in a sequence of REPL inputs and outputs in the [`REPLResult`](@ref) object.
+
+# Properties
+
+- `input::Bool`: whether this block represents a REPL input (i.e. an input `julia>`) or an output
+  from the REPL (either the plain string representation of the object, or the standard output or error
+  stream contents).
+
+- `code::String`: the contents of the block
+
+"""
 struct CodeBlock
     input::Bool
     code::String
@@ -5,6 +19,17 @@ end
 
 """
     struct REPLResult
+
+The result from a [`replblock!`](@ref) evaluation. It contains a sequence of input and output blocks.
+The inputs and outputs are separated, so that it would be easy for the users to style them differently
+if that is needed.
+
+See also: [`CodeBlock`](@ref), [`join_to_string`](@ref).
+
+# Properties
+
+- `sandbox :: Sandbox`: The `Sandbox` object in which the code was evaluated.
+- `blocks :: Vector{CodeBlock}`: The sequence of input and output block text.
 """
 struct REPLResult
     sandbox::Sandbox
@@ -22,11 +47,22 @@ function join_to_string(result::REPLResult)
 end
 
 """
-    CodeEvaluation.replblock!(sandbox::Sandbox, code::AbstractString) -> REPLResult
+    CodeEvaluation.replblock!(sandbox::Sandbox, code::AbstractString; kwargs...) -> REPLResult
 
 Evaluates the code in a special REPL-mode, where `code` gets split up into expressions,
 each of which gets evaluated one by one. The output is a string representing what this
 would look like if each expression had been evaluated in the REPL as separate commands.
+
+See also: [`REPLResult`](@ref), [`join_to_string`](@ref).
+
+# Keywords
+
+- `color::Bool=true`: determines whether or not to capture colored output (i.e. controls
+  the IOContext).
+
+- `post_process_inputs`: a function that can be used to post-process the input expressions.
+  It does not affect the code that is evaluated, just what gets included in the REPL input
+  blocks.
 """
 function replblock!(
     sandbox::Sandbox, code::AbstractString;
