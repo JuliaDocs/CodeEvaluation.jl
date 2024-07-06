@@ -94,7 +94,6 @@ end
             # Apparently on MacOS, pwd() and the temporary directory do
             # not exactly match. Put their realpath() versions do.
             @test realpath(r.value) == realpath(path)
-            @test r.value == path
             @test r.output === ""
         end
     end
