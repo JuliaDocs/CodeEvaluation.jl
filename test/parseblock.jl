@@ -22,13 +22,11 @@
 end
 
 @testset "complex" begin
-    exprs = CodeEvaluation.parseblock(
-        """
-        x += 3
-        γγγ_γγγ
-        γγγ
-        """
-    )
+    exprs = CodeEvaluation.parseblock("""
+                                      x += 3
+                                      γγγ_γγγ
+                                      γγγ
+                                      """)
     @test isa(exprs, Vector{CodeEvaluation.ParsedExpression})
     @test length(exprs) == 3
 

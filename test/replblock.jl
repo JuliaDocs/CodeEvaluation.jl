@@ -55,11 +55,14 @@ end
 
 @testset "replblock! - multiple expressions" begin
     sb = CodeEvaluation.Sandbox()
-    r = CodeEvaluation.replblock!(sb, """
-    x = 2
-    x += 2
-    x ^ 2
-    """)
+    r = CodeEvaluation.replblock!(
+        sb,
+        """
+x = 2
+x += 2
+x ^ 2
+"""
+    )
     @test length(r.blocks) == 6
     let b = r.blocks[1]
         @test b.input
@@ -101,9 +104,12 @@ end
 
 @testset "replblock! - output & results" begin
     sb = CodeEvaluation.Sandbox()
-    r = CodeEvaluation.replblock!(sb, """
-    print(stdout, "out"); print(stderr, "err"); 42
-    """)
+    r = CodeEvaluation.replblock!(
+        sb,
+        """
+print(stdout, "out"); print(stderr, "err"); 42
+"""
+    )
     @test length(r.blocks) == 2
     let b = r.blocks[1]
         @test b.input

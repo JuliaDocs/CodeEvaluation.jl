@@ -172,21 +172,17 @@ function evaluate!(
         end
         AnsValue(c.value)
     end
-    return Result(
-        sandbox,
-        value,
-        c.output,
-        expr,
-    )
+    return Result(sandbox, value, c.output, expr,)
 end
 
-function _remove_common_backtrace(bt, reference_bt = backtrace())
+function _remove_common_backtrace(bt, reference_bt=backtrace())
     cutoff = nothing
     # We'll start from the top of the backtrace (end of the array) and go down, checking
     # if the backtraces agree
-    for ridx in 1:length(bt)
+    for ridx = 1:length(bt)
         # Cancel search if we run out the reference BT or find a non-matching one frames:
-        if ridx > length(reference_bt) || bt[length(bt) - ridx + 1] != reference_bt[length(reference_bt) - ridx + 1]
+        if ridx > length(reference_bt) ||
+           bt[length(bt)-ridx+1] != reference_bt[length(reference_bt)-ridx+1]
             cutoff = length(bt) - ridx + 1
             break
         end

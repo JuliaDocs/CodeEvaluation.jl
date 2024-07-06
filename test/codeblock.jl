@@ -83,21 +83,30 @@ end
             end
 
             write(joinpath(path, "test.txt"), "123")
-            let r = CodeEvaluation.codeblock!(sb, """
-                isfile("test.txt"), read("test.txt", String)
-                """)
+            let r = CodeEvaluation.codeblock!(
+                    sb,
+                    """
+isfile("test.txt"), read("test.txt", String)
+"""
+                )
                 @test !r.error
                 @test r.value === (true, "123")
             end
-            let r = CodeEvaluation.codeblock!(sb, """
-                isfile("does-not-exist.txt")
-                """)
+            let r = CodeEvaluation.codeblock!(
+                    sb,
+                    """
+isfile("does-not-exist.txt")
+"""
+                )
                 @test !r.error
                 @test r.value === false
             end
-            let r = CodeEvaluation.codeblock!(sb, """
-                read("does-not-exist.txt", String)
-                """)
+            let r = CodeEvaluation.codeblock!(
+                    sb,
+                    """
+read("does-not-exist.txt", String)
+"""
+                )
                 @test r.error
                 @test r.value isa SystemError
             end

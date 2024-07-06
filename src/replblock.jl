@@ -65,26 +65,27 @@ See also: [`REPLResult`](@ref), [`join_to_string`](@ref).
   blocks.
 """
 function replblock!(
-    sandbox::Sandbox, code::AbstractString;
+    sandbox::Sandbox,
+    code::AbstractString;
     color::Bool=true,
-    post_process_inputs = identity,
+    post_process_inputs=identity,
 )
     exprs = parseblock(
         code;
-        keywords = false,
+        keywords=false,
         # line unused, set to 0
-        linenumbernode = LineNumberNode(0, "REPL"),
+        linenumbernode=LineNumberNode(0, "REPL"),
     )
     codeblocks = CodeBlock[]
     source_exprs = map(exprs) do pex
         input = post_process_inputs(pex.code)
-        result = evaluate!(sandbox, pex.expr; color, softscope=true, setans = true)
+        result = evaluate!(sandbox, pex.expr; color, softscope=true, setans=true)
         # Add the input and output to the codeblocks, if appropriate.
         if !isempty(input)
             push!(codeblocks, CodeBlock(true, _prepend_prompt(input)))
         end
         # Determine the output string and add to codeblocks
-        object_repl_repr = let buffer = IOContext(IOBuffer(), :color=>color)
+        object_repl_repr = let buffer = IOContext(IOBuffer(), :color => color)
             if !result.error
                 hide = REPL.ends_with_semicolon(input)
                 _result_to_string(buffer, hide ? nothing : result.value)
@@ -101,12 +102,7 @@ function replblock!(
         end
         outstr = _remove_sandbox_from_output(sandbox, String(take!(out)))
         push!(codeblocks, CodeBlock(false, outstr))
-        return (;
-            expr = pex,
-            result,
-            input,
-            outstr,
-        )
+        return (; expr=pex, result, input, outstr,)
     end
     return REPLResult(sandbox, codeblocks, code, source_exprs)
 end
@@ -119,7 +115,7 @@ end
 function _prepend_prompt(input::AbstractString)
     prompt  = "julia> "
     padding = " "^length(prompt)
-    out = IOBuffer()
+    out     = IOBuffer()
     for (n, line) in enumerate(split(input, '\n'))
         line = rstrip(line)
         println(out, n == 1 ? prompt : padding, line)
@@ -144,7 +140,7 @@ function _error_to_string(buffer::IO, e::Any, bt)
     bt = _remove_common_backtrace(bt, backtrace())
     # Remove everything below the last eval call (which should be the one in IOCapture.capture)
     index = findlast(ptr -> Base.ip_matches_func(ptr, :eval), bt)
-    bt = (index === nothing) ? bt : bt[1:(index - 1)]
+    bt = (index === nothing) ? bt : bt[1:(index-1)]
     # Print a REPL-like error message.
     print(buffer, "ERROR: ")
     Base.invokelatest(showerror, buffer, e, bt)
