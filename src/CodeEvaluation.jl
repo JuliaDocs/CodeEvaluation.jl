@@ -1,7 +1,10 @@
 module CodeEvaluation
-import IOCapture
+using IOCapture: IOCapture
+using REPL: REPL
 
+include("parseblock.jl")
 include("sandbox.jl")
-include("namedsandboxes.jl")
+include("codeblock.jl")
+include("replblock.jl")
 
 end
