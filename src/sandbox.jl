@@ -184,24 +184,6 @@ function evaluate!(
     )
 end
 
-#=
-"""
-"""
-function show_plain(result::Result; io_context::AbstractVector = [])
-    _check_io_context_value(io_context)
-    context = isempty(io_context) ? nothing : only(io_context)
-    mime = MIME"text/plain"()
-    s = stringmime(mime, result.value, context = context)
-    return replace(s, Regex(("(Main\\.)?$(nameof(mod))")) => "Main")
-end
-
-function _check_io_context_value(io_context::AbstractVector)
-    if any(x -> !isa(x, Pair{Symbol,<:Any}), io_context)
-        throw(ArgumentError("`io_context` must be a `Vector` of `Pair{Symbol,<:Any}`."))
-    end
-end
-=#
-
 function _remove_common_backtrace(bt, reference_bt = backtrace())
     cutoff = nothing
     # We'll start from the top of the backtrace (end of the array) and go down, checking
