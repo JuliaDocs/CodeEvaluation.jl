@@ -91,6 +91,9 @@ end
         let sb = CodeEvaluation.Sandbox(; workingdirectory=path)
             r = CodeEvaluation.evaluate!(sb, :(pwd()))
             @test !r.error
+            # Apparently on MacOS, pwd() and the temporary directory do
+            # not exactly match. Put their realpath() versions do.
+            @test realpath(r.value) == realpath(path)
             @test r.value == path
             @test r.output === ""
         end
