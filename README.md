@@ -2,6 +2,7 @@
 
 [![Build Status](https://github.com/JuliaDocs/CodeEvaluation.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaDocs/CodeEvaluation.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![PkgEval](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/C/CodeEvaluation.svg)](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/C/CodeEvaluation.html)
+[![codecov](https://codecov.io/gh/JuliaDocs/CodeEvaluation.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JuliaDocs/CodeEvaluation.jl)
 
 A small utility package to emulate executing Julia code, seemingly in a clean `Main` module.
 
