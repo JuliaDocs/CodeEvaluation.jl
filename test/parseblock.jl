@@ -43,7 +43,8 @@ end
 
     let expr = exprs[3]
         @test expr.expr === :γγγ
-        if VERSION >= v"1.10.0-DEV.1520" # JuliaSyntax merge
+        if VERSION >= v"1.10.0-DEV.1520" && # JuliaSyntax merge
+           VERSION < v"1.12"  # bug fix
             @test expr.code == "γγγ\n\n"
         else
             @test expr.code == "γγγ\n"
@@ -61,7 +62,8 @@ end
         l1, l2 = parse("x = Int[]$(LE)$(LE)push!(x, 1)$(LE)")
         @test l1.expr == :(x = Int[])
         @test l2.expr == :(push!(x, 1))
-        if VERSION >= v"1.10.0-DEV.1520" # JuliaSyntax merge
+        if VERSION >= v"1.10.0-DEV.1520" && # JuliaSyntax merge
+           VERSION < v"1.12"  # bug fix
             @test l1.code == "x = Int[]$(LE)$(LE)"
             @test l2.code == "push!(x, 1)$(LE)\n"
         else
@@ -84,7 +86,7 @@ end
         @test exprs[1].code == "x; y; z\n"
         @test exprs[2].expr == :q
         # TODO: There is a parsing difference here.. probably due to the JuliaSyntax change.
-        if VERSION < v"1.10"
+        if VERSION < v"1.10" || VERSION >= v"1.12"
             @test exprs[2].code == "q\n"
         else
             @test exprs[2].code == "q\n\n\n"
