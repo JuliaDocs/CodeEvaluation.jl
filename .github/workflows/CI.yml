@@ -31,7 +31,7 @@ jobs:
           - macos-latest
           - windows-latest
         arch:
-          - x64
+          - default
         include:
           - version: '1'
             os: ubuntu-latest
